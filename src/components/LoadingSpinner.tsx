@@ -1,5 +1,5 @@
 "use client";
-
+// 試験ようコメントアウト
 export default function LoadingSpinner() {
   return (
     <div className="flex h-full w-full items-center justify-center bg-gray-900">
