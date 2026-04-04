@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import LoadingSpinner from "./LoadingSpinner";
+import ErrorBoundary from "./ErrorBoundary";
 
 const Globe = dynamic(() => import("./Globe"), {
   ssr: false,
@@ -9,5 +10,9 @@ const Globe = dynamic(() => import("./Globe"), {
 });
 
 export default function GlobeWrapper() {
-  return <Globe />;
+  return (
+    <ErrorBoundary>
+      <Globe />
+    </ErrorBoundary>
+  );
 }
