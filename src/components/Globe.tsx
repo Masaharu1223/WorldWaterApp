@@ -1,23 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import type { Cartesian2 as Cartesian2Type, Viewer as ViewerType } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { CESIUM_ION_TOKEN, CESIUM_BASE_URL } from "@/lib/cesium-config";
-import { AirportWithWater, HardnessLevel } from "@/lib/types";
+import { AirportWithWater } from "@/lib/types";
+import { HARDNESS_CONFIG } from "@/lib/hardness";
 import AirportDetail from "./AirportDetail";
 import LoadingSpinner from "./LoadingSpinner";
 
-const hardnessColors: Record<HardnessLevel, [number, number, number]> = {
-  soft: [66, 135, 245], // blue
-  moderate: [245, 200, 66], // yellow
-  hard: [245, 140, 66], // orange
-  very_hard: [245, 66, 66], // red
-};
-
 export default function Globe() {
-  const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<ViewerType | null>(null);
+  const initRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [selectedAirport, setSelectedAirport] =
     useState<AirportWithWater | null>(null);
@@ -41,13 +35,12 @@ export default function Globe() {
     setSelectedAirport(null);
   }, []);
 
-  useEffect(() => {
-    let destroyed = false;
+  const containerRefCallback = useCallback((container: HTMLDivElement | null) => {
+    if (!container || initRef.current) return;
+    initRef.current = true;
 
-    async function init() {
+    async function init(el: HTMLDivElement) {
       const Cesium = await import("cesium");
-
-      if (destroyed || !containerRef.current) return;
 
       // Configure Cesium
       (window as unknown as Record<string, unknown>).CESIUM_BASE_URL =
@@ -55,7 +48,7 @@ export default function Globe() {
       Cesium.Ion.defaultAccessToken = CESIUM_ION_TOKEN;
 
       // Create viewer
-      const viewer = new Cesium.Viewer(containerRef.current, {
+      const viewer = new Cesium.Viewer(el, {
         animation: false,
         baseLayerPicker: false,
         fullscreenButton: false,
@@ -79,13 +72,11 @@ export default function Globe() {
         const res = await fetch("/api/airports");
         const airports: AirportWithWater[] = await res.json();
 
-        if (destroyed) return;
-
         // Add pins for each airport
         for (const airport of airports) {
           const wq = airport.water_quality;
           const color = wq
-            ? hardnessColors[wq.hardness_level]
+            ? HARDNESS_CONFIG[wq.hardness_level].rgb
             : [150, 150, 150];
 
           viewer.entities.add({
@@ -190,15 +181,7 @@ export default function Globe() {
       setLoading(false);
     }
 
-    init();
-
-    return () => {
-      destroyed = true;
-      if (viewerRef.current) {
-        viewerRef.current.destroy();
-        viewerRef.current = null;
-      }
-    };
+    init(container);
   }, []);
 
   return (
@@ -208,7 +191,7 @@ export default function Globe() {
           <LoadingSpinner />
         </div>
       )}
-      <div ref={containerRef} className="h-full w-full" />
+      <div ref={containerRefCallback} className="h-full w-full" />
       {hoveredAirport && !selectedAirport && (
         <div
           className="pointer-events-none absolute z-50 rounded-lg bg-black/80 px-3 py-2 text-sm text-white backdrop-blur-sm"

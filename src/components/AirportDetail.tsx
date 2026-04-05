@@ -1,39 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { AirportWithWater, HardnessLevel } from "@/lib/types";
+import { AirportWithWater } from "@/lib/types";
+import { HARDNESS_CONFIG } from "@/lib/hardness";
 
 interface Props {
   airport: AirportWithWater;
   onClose: () => void;
 }
 
-const hardnessConfig: Record<
-  HardnessLevel,
-  { label: string; color: string; bgColor: string }
-> = {
-  soft: { label: "軟水", color: "text-blue-300", bgColor: "bg-blue-500/30" },
-  moderate: {
-    label: "中程度",
-    color: "text-yellow-300",
-    bgColor: "bg-yellow-500/30",
-  },
-  hard: {
-    label: "硬水",
-    color: "text-orange-300",
-    bgColor: "bg-orange-500/30",
-  },
-  very_hard: {
-    label: "非常に硬い",
-    color: "text-red-300",
-    bgColor: "bg-red-500/30",
-  },
-};
-
 export default function AirportDetail({ airport, onClose }: Props) {
   const [closing, setClosing] = useState(false);
   const wq = airport.water_quality;
-  const config = wq ? hardnessConfig[wq.hardness_level] : null;
+  const config = wq ? HARDNESS_CONFIG[wq.hardness_level] : null;
 
   const handleClose = () => {
     setClosing(true);
@@ -104,7 +83,7 @@ export default function AirportDetail({ airport, onClose }: Props) {
             {/* Hardness badge + value */}
             <div className="mb-3 flex items-center gap-3">
               <span
-                className={`rounded-full px-4 py-1 text-sm font-semibold ${config!.bgColor} ${config!.color}`}
+                className={`rounded-full px-4 py-1 text-sm font-semibold ${config!.twBg} ${config!.twColor}`}
               >
                 {config!.label}
               </span>
