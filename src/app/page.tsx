@@ -1,4 +1,5 @@
 import GlobeWrapper from "@/components/GlobeWrapper";
+import { HARDNESS_CONFIG } from "@/lib/hardness";
 
 export default function Home() {
   return (
@@ -16,22 +17,14 @@ export default function Home() {
       {/* Legend */}
       <div className="absolute bottom-4 left-4 z-40 rounded-lg bg-black/60 px-3 py-2 text-xs text-white backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded-full bg-blue-500" />
-            軟水
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded-full bg-yellow-400" />
-            中程度
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded-full bg-orange-500" />
-            硬水
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
-            非常に硬い
-          </span>
+          {Object.values(HARDNESS_CONFIG).map((config) => (
+            <span key={config.label} className="flex items-center gap-1">
+              <span
+                className={`inline-block h-3 w-3 rounded-full ${config.twBgSolid}`}
+              />
+              {config.label}
+            </span>
+          ))}
         </div>
       </div>
 
